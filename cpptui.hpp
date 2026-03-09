@@ -84,7 +84,7 @@ namespace cpptui
 
     constexpr int VERSION_MAJOR = 1;
     constexpr int VERSION_MINOR = 3;
-    constexpr int VERSION_PATCH = 0;
+    constexpr int VERSION_PATCH = 1;
 
     inline std::string version()
     {
@@ -5317,6 +5317,8 @@ namespace cpptui
         std::string empty_char = " "; // Default filler (space for clean modern look)
         bool accepts_tab = false;     ///< If true, Tab key inserts spaces instead of moving focus
         int tab_size = 4;             ///< Number of spaces for Tab key
+        bool is_password = false;     ///< If true, obscure input text
+        std::string password_char = "*"; ///< Character used to obscure input text when is_password is true
 
         // Colors
         Color fg_color = Color();
@@ -5382,6 +5384,16 @@ namespace cpptui
 
             // Pre-compute UTF-8 characters for value
             std::vector<CharInfo> value_chars = TextHelper::prepare_text_for_render(value_);
+
+            if (is_password && !password_char.empty())
+            {
+                int mask_width = TextHelper::utf8_display_width(password_char);
+                for (auto& ci : value_chars)
+                {
+                    ci.content = password_char;
+                    ci.display_width = mask_width;
+                }
+            }
 
             // Compute display width up to cursor position
             int cursor_visual_x = 0;
