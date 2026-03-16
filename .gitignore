@@ -33,3 +33,10 @@ Thumbs.db
 *_sim
 *.txt
 *_logger
+
+# Jekyll
+docs/_site/
+docs/.jekyll-cache/
+docs/.jekyll-metadata/
+.bundle/
+vendor/

@@ -7,4 +7,9 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     build-essential \
     gdb \
     xclip \
+    ruby-full \
+    zlib1g-dev \
     && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+
+# Install Jekyll and Bundler
+RUN gem install jekyll bundler

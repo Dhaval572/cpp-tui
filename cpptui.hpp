@@ -14008,7 +14008,6 @@ namespace cpptui
         std::vector<Segment> segments;
         bool show_legend = true;
         bool show_percentages = false;
-        double inner_radius = 0.0; // >0 for donut
 
         void add_segment(double val, const std::string &label, cpptui::Color col)
         {
