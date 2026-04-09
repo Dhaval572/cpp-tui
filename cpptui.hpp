@@ -118,7 +118,7 @@ namespace cpptui
     struct TextHelper
     {
         /// @brief Decode a UTF-8 character from a string
-        static bool utf8_decode_codepoint(const std::string &s, size_t pos, uint32_t &out_codepoint, int &out_len)
+        static bool utf8_decode_codepoint(std::string_view s, size_t pos, uint32_t &out_codepoint, int &out_len)
         {
             if (pos >= s.size())
                 return false;
@@ -214,7 +214,7 @@ namespace cpptui
         }
 
         /// @brief Calculate total display width of a string
-        static int utf8_display_width(const std::string &s)
+        static int utf8_display_width(std::string_view &s)
         {
             int width = 0;
             size_t pos = 0;
@@ -252,7 +252,7 @@ namespace cpptui
         }
 
         /// @brief Pre-process text into characters for rendering
-        static std::vector<CharInfo> prepare_text_for_render(const std::string &text)
+        static std::vector<CharInfo> prepare_text_for_render(std::string_view text)
         {
             std::vector<CharInfo> chars;
             size_t pos = 0;
@@ -267,7 +267,7 @@ namespace cpptui
                     ci.display_width = char_display_width(codepoint);
                     if (ci.display_width < 0)
                         ci.display_width = 0;
-                    chars.push_back(ci);
+                    chars.emplace_back(ci);
                     pos += byte_len;
                 }
                 else
@@ -535,7 +535,7 @@ namespace cpptui
     {
         return TextHelper::char_display_width(codepoint);
     }
-    inline int utf8_display_width(const std::string &s)
+    inline int utf8_display_width(std::string_view s)
     {
         return TextHelper::utf8_display_width(s);
     }
@@ -5325,7 +5325,7 @@ namespace cpptui
         bool accepts_tab = false;     ///< If true, Tab key inserts spaces instead of moving focus
         int tab_size = 4;             ///< Number of spaces for Tab key
         bool is_password = false;     ///< If true, obscure input text
-        std::string password_char = "*"; ///< Character used to obscure input text when is_password is true
+        std::string_view password_char = "*"; ///< Character used to obscure input text when is_password is true
 
         // Colors
         Color fg_color = Color();
