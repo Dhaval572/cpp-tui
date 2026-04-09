@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string_view>
 #ifdef _WIN32
 #define NOMINMAX
 #include <windows.h>
@@ -11,6 +10,9 @@
 #include <sys/ioctl.h>
 #endif
 
+#include <cstdint>
+#include <span>
+#include <string_view>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -112,6 +114,7 @@ namespace cpptui
     {
         std::string content; ///< The UTF-8 string content of the character
         int display_width;   ///< The display width (0, 1, or 2)
+        uint32_t codepoint;
     };
 
     /// @brief Centralized helper for text manipulation, UTF-8 processing, and selection logic
@@ -279,7 +282,7 @@ namespace cpptui
         }
 
         /// @brief Convert visual X to character index
-        static int visual_to_char_pos(const std::vector<CharInfo> &chars, int visual_x)
+        static int visual_to_char_pos(std::span<const CharInfo> chars, int visual_x)
         {
             int current_vx = 0;
             for (size_t i = 0; i < chars.size(); ++i)
@@ -289,11 +292,11 @@ namespace cpptui
                     return (int)i;
                 current_vx += cw;
             }
-            return (int)chars.size();
+            return static_cast<int>(chars.size());
         }
 
         /// @brief Convert character index to byte offset
-        static size_t char_to_byte_pos(const std::string &text, size_t char_idx)
+        static size_t char_to_byte_pos(std::string_view text, size_t char_idx)
         {
             size_t pos = 0;
             size_t count = 0;
@@ -315,43 +318,27 @@ namespace cpptui
         }
 
         /// @brief Find word boundaries at a given character position
-        static void select_word_at(const std::vector<CharInfo> &chars, int pos, int &start, int &end)
+        static void select_word_at(std::span<const CharInfo> chars, int pos, int &start, int &end)
         {
-            if (pos < 0 || pos >= (int)chars.size())
+            if(pos < 0 || pos >= static_cast<int>(chars.size()))
             {
-                if (pos < 0)
-                    pos = 0;
-                if (pos > (int)chars.size())
-                    pos = (int)chars.size();
-                start = pos;
-                end = pos;
+                start = std::clamp(pos, 0, static_cast<int>(chars.size()));
+                end = start;
                 return;
             }
-
-            std::vector<uint32_t> codepoints;
-            codepoints.reserve(chars.size());
-            for (const auto &c : chars)
-            {
-                uint32_t cp;
-                int len;
-                utf8_decode_codepoint(c.content, 0, cp, len);
-                codepoints.push_back(cp);
-            }
-
-            if (!is_word_char(codepoints[pos]))
+            
+            if(!is_word_char(chars[pos].codepoint))
             {
                 start = pos;
                 end = pos + 1;
                 return;
             }
-
+            
             start = pos;
-            while (start > 0 && is_word_char(codepoints[start - 1]))
-                start--;
-
+            while(start > 0 && is_word_char(chars[start - 1].codepoint)) start--;
+            
             end = pos;
-            while (end < (int)codepoints.size() && is_word_char(codepoints[end]))
-                end++;
+            while(end < static_cast<int>(chars.size()) && is_word_char(chars[end].codepoint)) end++;     
         }
 
         // --- New Helper Methods ---
