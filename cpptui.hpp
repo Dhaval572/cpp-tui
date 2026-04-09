@@ -14875,9 +14875,13 @@ namespace cpptui
             int bx = show_border ? 1 : 0;
             int by = show_border ? 1 : 0;
 
-            const char *months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+            static constexpr const char* MONTHS[] = 
+            {
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            };
             char month_str[16];
-            snprintf(month_str, sizeof(month_str), "%s %d", months[month - 1], year);
+            snprintf(month_str, sizeof(month_str), "%s %d", MONTHS[month - 1], year);
             int month_len = strlen(month_str);
             int grid_width = 21;           // 7 days * 3 chars
             int hdr_width = month_len + 4; // "< month_str >"
@@ -14959,9 +14963,13 @@ namespace cpptui
             next_btn->render(buffer);
 
             // Month and year label
-            const char *months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+            static constexpr const char* MONTHS[] = 
+            {
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            };
             char month_str[16];
-            snprintf(month_str, sizeof(month_str), "%s %d", months[month - 1], year);
+            snprintf(month_str, sizeof(month_str), "%s %d", MONTHS[month - 1], year);
             int month_len = strlen(month_str);
             int label_x = prev_btn->x + 2;
 
@@ -14973,19 +14981,18 @@ namespace cpptui
                 c.bg_color = bg;
                 buffer.set(label_x + i, y + by, c);
             }
-
-            // Day headers
-            const char *days[] = {"Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"};
+            
+            static constexpr std::array<std::string_view, 7> days =
+            {  
+                "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"
+            };
             for (int i = 0; i < 7; ++i)
             {
-                Cell c1;
-                c1.content = std::string(1, days[i][0]);
-                c1.fg_color = hdr;
-                c1.bg_color = bg;
-                Cell c2;
-                c2.content = std::string(1, days[i][1]);
-                c2.fg_color = hdr;
-                c2.bg_color = bg;
+                Cell c1, c2;
+                c1.content = days[i].substr(0, 1);   
+                c2.content = days[i].substr(1, 1);   
+                c1.fg_color = c2.fg_color = hdr;
+                c1.bg_color = c2.bg_color = bg;
                 buffer.set(x + bx + i * 3, y + by + 1, c1);
                 buffer.set(x + bx + i * 3 + 1, y + by + 1, c2);
             }
