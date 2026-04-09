@@ -1,6 +1,7 @@
 #include "cpptui.hpp"
 #include <deque>
 #include <iomanip>
+#include <string_view>
 
 using namespace cpptui;
 
@@ -88,10 +89,10 @@ public:
         int current_y = y;
 
         // Title
-        std::string title = "Event Logger (Press keys or click)";
+        std::string_view title = "Event Logger (Press keys or click)";
         for (int i = 0; i < (int)title.length() && i < width; ++i)
         {
-            buffer.set_char(x + i, current_y, std::string(1, title[i]));
+            buffer.set_char(x + i, current_y, title);
         }
         current_y++;
 
@@ -107,7 +108,7 @@ public:
                 break;
             for (int dx = 0; dx < width && dx < (int)line.length(); ++dx)
             {
-                buffer.set_char(x + dx, current_y, std::string(1, line[dx]));
+                buffer.set_char(x + dx, current_y, line[dx]);
             }
             current_y++;
         }
@@ -144,11 +145,12 @@ int main()
     theme_layout->fixed_height = 1;
 
     auto btn_toggle = std::make_shared<Button>("Switch Theme", []()
-                                               {
+    {
         static bool is_dark = true;
         is_dark = !is_dark;
         if (is_dark) Theme::set_theme(Theme::Dark());
-        else Theme::set_theme(Theme::Light()); });
+        else Theme::set_theme(Theme::Light()); 
+    });
 
     theme_layout->add(std::make_shared<Label>("Theme: "));
     theme_layout->add(btn_toggle);

@@ -9,6 +9,7 @@ Testing/
 CPackConfig.cmake
 CPackSourceConfig.cmake
 !CMakeLists.txt
+.cache
 
 # VS Code
 .vscode/

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string_view>
 #ifdef _WIN32
 #define NOMINMAX
 #include <windows.h>
@@ -1311,7 +1312,7 @@ namespace cpptui
         {
             cells_.resize(height * width);
             // Default clip is full buffer
-            clip_stack_.push_back({0, 0, width, height});
+            clip_stack_.emplace_back(0, 0, width, height);
         }
 
         /// @brief Resize the buffer, clearing current content
@@ -1323,7 +1324,7 @@ namespace cpptui
             height_ = height;
             cells_.assign(width * height, Cell{});
             clip_stack_.clear();
-            clip_stack_.push_back({0, 0, width, height});
+            clip_stack_.emplace_back(0, 0, width, height);
         }
 
         /// @brief Push a new clipping rectangle onto the stack
@@ -1333,11 +1334,11 @@ namespace cpptui
         {
             if (clip_stack_.empty())
             {
-                clip_stack_.push_back(r);
+                clip_stack_.emplace_back(r);
             }
             else
             {
-                clip_stack_.push_back(clip_stack_.back().intersect(r));
+                clip_stack_.emplace_back(clip_stack_.back().intersect(r));
             }
         }
 
@@ -1354,7 +1355,7 @@ namespace cpptui
         /// Useful for overlay widgets like Notification that need to render at screen coordinates.
         void push_full_clip()
         {
-            clip_stack_.push_back({0, 0, width_, height_});
+            clip_stack_.emplace_back(0, 0, width_, height_);
         }
 
         /// @brief Get the current active clipping rectangle
@@ -1387,7 +1388,13 @@ namespace cpptui
         /// @param x X coordinate
         /// @param y Y coordinate
         /// @param ch The UTF-8 character string
-        void set_char(int x, int y, const std::string &ch)
+        ///
+
+        void set_char(int x, int y, char ch)
+        {
+            set_char(x, y, std::string_view(&ch, 1));
+        }
+        void set_char(int x, int y, std::string_view ch)
         {
             Rect c = current_clip();
             if (x >= c.x && x < c.x + c.width && y >= c.y && y < c.y + c.height)
@@ -2131,7 +2138,7 @@ namespace cpptui
                          {
                              HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
                              HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
-                             
+
                              std::cout << "\033[?25h"; // Show cursor
                              std::cout << "\033[?1049l"; // Disable alternate buffer
                          }
@@ -16275,17 +16282,17 @@ namespace cpptui
             input_page->width = 4;
 
             btn_next = std::make_shared<Button>(">", [this]()
-                                                { 
+                                                {
                 int ps = get_page_size();
                 int total_pages = (rows.size() + ps - 1) / ps;
-                if(current_page < total_pages - 1) current_page++; 
+                if(current_page < total_pages - 1) current_page++;
                 update_input(); });
 
             btn_last = std::make_shared<Button>(">>", [this]()
-                                                { 
+                                                {
                 int ps = get_page_size();
                 int total_pages = (rows.size() + ps - 1) / ps;
-                if(total_pages > 0) current_page = total_pages - 1; 
+                if(total_pages > 0) current_page = total_pages - 1;
                 update_input(); });
 
             // Default buttons are dark (CoolGreyDark), which contrasts well with light table.
