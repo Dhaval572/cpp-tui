@@ -326,25 +326,25 @@ namespace cpptui
                 end = start;
                 return;
             }
-            
+
             if(!is_word_char(chars[pos].codepoint))
             {
                 start = pos;
                 end = pos + 1;
                 return;
             }
-            
+
             start = pos;
             while(start > 0 && is_word_char(chars[start - 1].codepoint)) start--;
-            
+
             end = pos;
-            while(end < static_cast<int>(chars.size()) && is_word_char(chars[end].codepoint)) end++;     
+            while(end < static_cast<int>(chars.size()) && is_word_char(chars[end].codepoint)) end++;
         }
 
         // --- New Helper Methods ---
 
         /// @brief Count number of UTF-8 codepoints in a string
-        static size_t count_codepoints(const std::string &text)
+        static size_t count_codepoints(std::string_view text)
         {
             size_t count = 0;
             size_t pos = 0;
@@ -366,19 +366,19 @@ namespace cpptui
         }
 
         /// @brief Safe UTF-8 substring
-        static std::string utf8_substr(const std::string &text, size_t start_char_idx, size_t count = std::string::npos)
+        static std::string utf8_substr(std::string_view text, size_t start_char_idx, size_t count = std::string::npos)
         {
             size_t byte_start = char_to_byte_pos(text, start_char_idx);
             if (count == std::string::npos)
             {
-                return text.substr(byte_start);
+                return std::string(text.substr(byte_start));
             }
             size_t byte_end = char_to_byte_pos(text, start_char_idx + count);
-            return text.substr(byte_start, byte_end - byte_start);
+            return std::string(text.substr(byte_start, byte_end - byte_start));
         }
 
         /// @brief Find word boundaries (generic string version)
-        static void find_word_boundaries(const std::string &text, int char_idx, int &start, int &end)
+        static void find_word_boundaries(std::string_view text, int char_idx, int &start, int &end)
         {
             auto chars = prepare_text_for_render(text);
             select_word_at(chars, char_idx, start, end);
@@ -500,7 +500,7 @@ namespace cpptui
         }
 
         /// @brief Get selected text
-        std::string get_selected_text(const std::vector<CharInfo> &chars) const
+        std::string get_selected_text(std::span<const CharInfo> chars) const
         {
             if (!has_selection())
                 return "";
@@ -514,7 +514,7 @@ namespace cpptui
     };
 
     // Backward compatibility wrappers
-    inline bool utf8_decode_codepoint(const std::string &s, size_t pos, uint32_t &out_codepoint, int &out_len)
+    inline bool utf8_decode_codepoint(std::string_view s, size_t pos, uint32_t &out_codepoint, int &out_len)
     {
         return TextHelper::utf8_decode_codepoint(s, pos, out_codepoint, out_len);
     }
@@ -530,8 +530,9 @@ namespace cpptui
     {
         return TextHelper::is_word_char(cp);
     }
-    inline int utf8_char_byte_length(const std::string &s, size_t pos)
+    inline int utf8_char_byte_length(std::string_view s, size_t pos)
     {
+        if (pos >= s.size()) return 1;
         // Helper to determine char byte length
         unsigned char c = static_cast<unsigned char>(s[pos]);
         if ((c & 0x80) == 0)
@@ -544,7 +545,7 @@ namespace cpptui
             return 4;
         return 1;
     }
-    inline std::vector<CharInfo> prepare_text_for_render(const std::string &text)
+    inline std::vector<CharInfo> prepare_text_for_render(std::string_view text)
     {
         return TextHelper::prepare_text_for_render(text);
     }
